@@ -4,12 +4,19 @@ from pytorch_lightning import LightningModule
 from torchmetrics.functional import accuracy
 from utils.training_utils import get_criterion, get_scheduler, get_optimizer
 
-from model.ADFCNN import get_model
-# from model.FBCNet import get_model
-# from model.ShallowConvNet import get_model
-# from model.DeepConvNet import get_model
-# from model.EEGNet import get_model
-# from model.IFNetV2 import get_model
+
+#from model.ADFCNN import get_model
+#from model.FBCNet import get_model
+#from model.ShallowConvNet import get_model
+#from model.DeepConvNet import get_model
+#from model.EEGNet import get_model
+#from model.IFNetV2 import get_model
+
+#from model.AMFCNN import get_model
+#from model.eegcnn import get_model
+#from model.CNNGRU import get_model
+from model.Test import get_model
+#from model.Test1 import get_model
 
 class LitModel(LightningModule):
     def __init__(self, args):
@@ -49,9 +56,10 @@ class LitModel(LightningModule):
                 sync_dist=True)
         return {'loss': loss}
 
-    
+
     def training_epoch_end(self, outputs):
         if self.current_epoch == 0:
+            #return
             self.logger.experiment.add_graph(self.model, self.sample_batch)
     
     
@@ -61,6 +69,7 @@ class LitModel(LightningModule):
         
         outputs = self(inputs)
         loss = self.criterion(outputs, labels)
+        
         preds = torch.argmax(outputs, dim=1)
         acc = accuracy(preds, labels if labels.dim() == 1 else torch.argmax(labels, dim=1))
         
