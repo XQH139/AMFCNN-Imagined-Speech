@@ -18,18 +18,19 @@ from utils.setup_utils import (
 )
 from utils.training_utils import get_callbacks
 
+
 '''Argparse'''
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--subject_num', type=int, default=17)
+parser.add_argument('--subject_num', type=int, default=8)
 parser.add_argument('--fold_num', type=int, default=0)
 parser.add_argument('--gpu_num', type=str, default='0')
-parser.add_argument('--config_name', type=str, default='bcicompet2a_config')
+parser.add_argument('--config_name', type=str, default='Nguyen_config')
 aargs = parser.parse_args()
 
 
 # Config setting
-with open('/home/user_taowei/PycharmProjects/ADFCNN/configs/bcicompet2b_config.yaml') as file:
+with open('D:/Project/AI/MyProject/configs/Nguyen_config.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
     args = EasyDict(config)
 
@@ -48,7 +49,7 @@ cudnn.deterministic = True
 
 
 #### Set Log ####
-args['current_time'] = datetime.now().strftime('%Y%m%d')
+args['current_time'] = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 args['LOG_NAME'] = get_log_name(args)
 
 
@@ -58,11 +59,15 @@ if args.downsampling != 0: args['sampling_rate'] = args.downsampling
 
 
 '''Training''' # 
-for num_subject in range(args.num_subjects):
-    # if num_subject != aargs.subject_num: continue
-    args['target_subject'] = num_subject
+if aargs.config_name != 'MultiDataset_config':
     
+    #remember to change training_utils and bci_compet and evaluation when changing training mode
+    #for num_subject in range(args.num_subjects):          #Tab
+        #if num_subject != aargs.subject_num: continue   # within subject training except this line
+    #    args['target_subject'] = num_subject              #
+        
     dataset = get_dataset(aargs.config_name, args)
+    
 
     kfold = KFold(n_splits=args.k_folds, shuffle=True, random_state=args.SEED)
 
@@ -83,23 +88,78 @@ for num_subject in range(args.num_subjects):
                                     pin_memory=False,
                                     num_workers=args.num_workers,
                                     sampler=val_subsampler)
-
+        
         model = get_litmodel(args)
+        
         logger = TensorBoardLogger(args.LOG_PATH,
-                                    name='/data/home/yc07466/Project/DHCNN/{args.LOG_NAME}/S{args.target_subject:02d}_fold{fold + 1}')
+                                    name=f'./{args.LOG_NAME}/fold{fold + 1}') #/S{args.target_subject:02d} #all data training
+        #logger = TensorBoardLogger(args.LOG_PATH,
+        #                                name=f'./{args.LOG_NAME}/S{args.target_subject:02d}_fold{fold + 1}')
+        
         callbacks = get_callbacks(fold=fold, monitor='val_acc', args=args)
-
+        
         trainer = Trainer(enable_progress_bar=True,
             max_epochs=args.EPOCHS,
             gpus=[int(aargs.gpu_num)],
             callbacks=callbacks,
             default_root_dir=args.CKPT_PATH,
-            logger=logger,
+            logger=logger
         )
-
+        
         trainer.fit(model,
                     train_dataloaders=train_dataloader,
                     val_dataloaders=val_dataloader)
 
         torch.cuda.empty_cache()
+            
+            
+elif aargs.config_name == 'MultiDataset_config':
+    
+    for i in range(args.datasets):
+        args.dataset= args.datasets[i]['name']
+        
+        for num_subject in range(args.datasets[i]['num_subjects']):
+            # if num_subject != aargs.subject_num: continue
+            args['target_subject'] = num_subject
+            
+            dataset = get_dataset(aargs.config_name, args)
+            
 
+            kfold = KFold(n_splits=args.k_folds, shuffle=True, random_state=args.SEED)
+
+            for fold, (train_idx, val_idx) in enumerate(kfold.split(dataset)):
+                # if fold != aargs.fold_num: continue
+
+                ### Set dataloader ###
+                train_subsampler = torch.utils.data.SubsetRandomSampler(train_idx)
+                val_subsampler = torch.utils.data.SubsetRandomSampler(val_idx)
+
+                train_dataloader = DataLoader(dataset,
+                                            batch_size=args.batch_size,
+                                            pin_memory=False,
+                                            num_workers=args.num_workers,
+                                            sampler=train_subsampler)
+                val_dataloader = DataLoader(dataset,
+                                            batch_size=args.batch_size,
+                                            pin_memory=False,
+                                            num_workers=args.num_workers,
+                                            sampler=val_subsampler)
+                
+                model = get_litmodel(args)
+                logger = TensorBoardLogger(args.LOG_PATH,
+                                            name=f'./{args.LOG_NAME}/S{args.target_subject:02d}_fold{fold + 1}')
+                callbacks = get_callbacks(fold=fold, monitor='val_acc', args=args)
+                
+                trainer = Trainer(enable_progress_bar=True,
+                    max_epochs=args.EPOCHS,
+                    gpus=[int(aargs.gpu_num)],
+                    callbacks=callbacks,
+                    default_root_dir=args.CKPT_PATH,
+                    logger=logger
+                )
+                
+                trainer.fit(model,
+                            train_dataloaders=train_dataloader,
+                            val_dataloaders=val_dataloader)
+
+                torch.cuda.empty_cache()

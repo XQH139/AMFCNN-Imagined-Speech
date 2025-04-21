@@ -27,8 +27,8 @@ from utils.setup_utils import (
 '''Argparse'''
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('--config_name', type=str, default='bcicompet2a_config')
-parser.add_argument('--ckpt_path', type=str, default='20230720_task_BCICompet2a_batch_16_lr_1e-3_window_3_IFNet')
+parser.add_argument('--config_name', type=str, default='Nguyen_config')
+parser.add_argument('--ckpt_path', type=str, default='2025-04-02-10-46-49_task_Nguyen_batch_50_lr_1e-3_window_3_AMFCNN-cross-branch23')
 parser.add_argument('--subject_num', type=int, default=1)
 aargs = parser.parse_args()
 
@@ -36,7 +36,7 @@ aargs = parser.parse_args()
 ### Set confings
 config_name = aargs.config_name
 
-with open(f'configs/{config_name}.yaml') as file:
+with open(f'D:\Project\AI\MyProject\configs\{config_name}.yaml') as file:
     config = yaml.load(file, Loader=yaml.FullLoader)
     args = EasyDict(config)
     
@@ -85,19 +85,20 @@ for num_subject in range(args.num_subjects):
                                     pin_memory=False,
                                     num_workers=args.num_workers)
         
-        ckpt_path = sorted(glob(f'{args.CKPT_PATH}/{args.LOG_NAME}/fold_{fold + 1}/*S{num_subject:02d}*'))[-1]
+        #ckpt_path = sorted(glob(f'{args.CKPT_PATH}/{args.LOG_NAME}/fold_{fold + 1}/*S{num_subject:02d}*'))[-1]
+        ckpt_path = sorted(glob(f'{args.CKPT_PATH}/{args.LOG_NAME}/fold_{fold + 1}/*'))[-1]
         print(ckpt_path)
         model = get_litmodel(args)
         model.load_state_dict(torch.load(ckpt_path, map_location=args.device)['state_dict'], strict=False)
         
         trainer = Trainer(
-            gpus=[int(args.GPU_NUM)],
+            gpus=None
         )
         
         logits = trainer.predict(model, dataloaders=test_dataloader)
         result = torch.cat(logits, dim=0).argmax(axis=1)
         result = F.one_hot(result, num_classes=args.num_classes).detach().cpu().numpy()
-        results += result     
+        results += result
         
         torch.cuda.empty_cache()
         
