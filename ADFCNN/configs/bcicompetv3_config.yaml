@@ -1,0 +1,36 @@
+#### Path ####
+BASE_PATH: "./AI/Datasets/BCI Competition V-3"
+LOG_PATH: "./AI/Datasets/BCI Competition V-3/logs"
+CKPT_PATH: "./AI/Datasets/BCI Competition V-3/checkpoints"
+
+#### Setting step ####
+SEED: 42
+GPU_NUM: "1"
+num_workers: 0
+
+#### Training step ####
+EPOCHS: 1000
+batch_size: 15
+lr: 1e-3
+window_length: 3
+
+weight_decay: 0.075
+k_folds: 5
+
+#### Experiment variable ####
+task: "BCI Competition V-3"
+num_classes: 5
+num_channels: 64
+downsampling: 0
+
+num_subjects: 15
+sampling_rate: 256
+target_subject: None
+is_test: False
+
+#### Etc ###
+log_etc: "ADFCNN"
+momentum: 0.9
+filter_bank: False
+#bank: [[[4, 8]], [[8, 12]], [[12, 16]], [[16, 20]], [[20, 24]], [[24, 28]], [[28, 32]], [[32, 36]], [[36, 40]]]
+bank: [[[8, 70]]]

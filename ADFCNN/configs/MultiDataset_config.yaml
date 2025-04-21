@@ -1,0 +1,42 @@
+#### Path ####
+BASE_PATH: "./AI/Datasets/"
+LOG_PATH: "./AI/Datasets/logs/"
+CKPT_PATH: "./AI/Datasets/checkpoints"
+
+#### Setting step ####
+SEED: 42
+GPU_NUM: "1"
+num_workers: 0
+
+#### Training step ####
+EPOCHS: 1000
+batch_size: 16
+lr: 1e-3
+window_length: 3
+
+weight_decay: 0.075
+k_folds: 5
+
+#### Experiment variable ####
+task: "MultiDataset"
+datasets: [
+    {name: "BCI Competition V-3", num_classes: 5, num_channels: 64, num_subjects: 15, sampling_rate: 256, duration: },
+    {name: "KaraOne", num_classes: 11, num_channels: 62, num_subjects: 12, sampling_rate: 1000},
+    
+    {name: "Think Out Loud", num_classes: 4, num_channels: 128, num_subjects: 10, sampling_rate: 1024} #Biosemi ABC Layout not 10-20, but can be approximated to 10-20
+    
+    #{name: "Coretto", num_classes: 11, num_channels: 6,  num_subjects: 15, sampling_rate: 1024}, #only 6 channels, excluded
+    #{name: "Nguyen", num_classes: 8, num_channels: 60,  num_subjects: 22, sampling_rate: 256} #only preprocessed data, no channel info
+]
+
+downsampling: 0
+dataset: None
+target_subject: None
+
+
+#### Etc ###
+log_etc: "ADFCNN"
+momentum: 0.9
+filter_bank: False
+#bank: [[[4, 8]], [[8, 12]], [[12, 16]], [[16, 20]], [[20, 24]], [[24, 28]], [[28, 32]], [[32, 36]], [[36, 40]]]
+bank: [[[4, 16]], [[16, 40]]]

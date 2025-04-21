@@ -1,0 +1,33 @@
+#### Path ####
+BASE_PATH: "./AI/Datasets/Nguyen/"
+LOG_PATH: "./AI/Datasets/Nguyen/logs"
+CKPT_PATH: "./AI/Datasets/Nguyen/checkpoints"
+
+#### Setting step ####
+SEED: 42
+GPU_NUM: "1"
+num_workers: 0
+
+#### Training step ####
+EPOCHS: 100
+batch_size: 50
+lr: 1e-3
+window_length: 3
+
+weight_decay: 0.075
+k_folds: 5
+
+#### Experiment variable ####
+task: "Nguyen"
+#subtask: 'Vowels' #subfolder name
+num_classes: 8
+num_channels: 60
+downsampling: 0
+
+num_subjects: 22
+sampling_rate: 256
+target_subject: None
+is_test: False
+
+#### Etc ###
+log_etc: "AMFCNN-cross-branch23"
