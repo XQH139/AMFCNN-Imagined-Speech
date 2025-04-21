@@ -29,13 +29,15 @@ def get_checkpoint_callback(fold: int, monitor: str, args):
     if monitor == 'val_acc':
         return ModelCheckpoint(monitor=monitor,
                                 dirpath=f'{args.CKPT_PATH}/{args.LOG_NAME}/fold_{fold + 1}',
-                                filename=f'{args.task}_S{args.target_subject:02d}_' + '{epoch:02d}-{val_acc:.3f}',
+                                filename=f'{args.task}_' + '{epoch:02d}-{val_acc:.3f}', #_S{args.target_subject:02d} #all data training
+                                #filename=f'{args.task}_S{args.target_subject:02d}' + '_{epoch:02d}-{val_acc:.3f}',
                                 save_top_k=3,
                                 mode='max')
     elif monitor == 'val_loss':
         return ModelCheckpoint(monitor=monitor,
                                 dirpath=f'{args.CKPT_PATH}/{args.LOG_NAME}/fold_{fold + 1}',
-                                filename=f'{args.task}_S{args.target_subject:02d}_' + '{epoch:02d}-{val_loss:.3f}',
+                                filename=f'{args.task}_' + '{epoch:02d}-{val_loss:.3f}', #_S{args.target_subject:02d} #all data training
+                                #filename=f'{args.task}_S{args.target_subject:02d}' + '_{epoch:02d}-{val_loss:.3f}',
                                 save_top_k=3,
                                 mode='min')
     else:
